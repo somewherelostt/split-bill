@@ -1,0 +1,11 @@
+{
+  "name": "split-bill",
+  "version": "0.1.0",
+  "description": "Split a shared bill between friends, down to the cent.",
+  "type": "module",
+  "main": "src/split.js",
+  "scripts": {
+    "test": "node --test"
+  },
+  "license": "MIT"
+}
