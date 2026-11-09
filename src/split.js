@@ -1,10 +1,17 @@
 // Split a shared bill between friends. Amounts are in dollars.
 
-/** Split `total` evenly between `people` (array of names). Returns { name: amount }. */
+/**
+ * Split `total` evenly between `people` (array of names). Returns { name: amount }.
+ * Shares always add up to `total`: leftover cents go one each to the first people.
+ */
 export function splitEvenly(total, people) {
   if (people.length === 0) throw new Error("need at least one person");
-  const share = Math.floor((total / people.length) * 100) / 100;
-  return Object.fromEntries(people.map((name) => [name, share]));
+  const cents = Math.round(total * 100);
+  const base = Math.floor(cents / people.length);
+  const leftover = cents - base * people.length;
+  return Object.fromEntries(
+    people.map((name, i) => [name, (base + (i < leftover ? 1 : 0)) / 100]),
+  );
 }
 
 /** Split `total` by weights, e.g. { alice: 2, bob: 1 }. Returns { name: amount }. */
