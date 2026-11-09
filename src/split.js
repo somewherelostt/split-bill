@@ -23,9 +23,12 @@ export function splitByShares(total, shares) {
  */
 export function settleUp(paid) {
   const names = Object.keys(paid);
-  const total = names.reduce((sum, name) => sum + paid[name], 0);
-  const fair = total / names.length;
-  const balances = names.map((name) => ({ name, balance: paid[name] - fair }));
+  // Work in whole cents so balances are exact and leftover cents can be shared out.
+  const cents = names.map((name) => Math.round(paid[name] * 100));
+  const total = cents.reduce((sum, c) => sum + c, 0);
+  const base = Math.floor(total / names.length);
+  const extra = total - base * names.length;
+  const balances = names.map((name, i) => ({ name, balance: cents[i] - base - (i < extra ? 1 : 0) }));
   const owes = balances.filter((b) => b.balance < 0).sort((a, b) => a.balance - b.balance);
   const owed = balances.filter((b) => b.balance > 0).sort((a, b) => b.balance - a.balance);
   const transfers = [];
@@ -35,7 +38,7 @@ export function settleUp(paid) {
       if (left <= 0) break;
       if (creditor.balance <= 0) continue;
       const amount = Math.min(left, creditor.balance);
-      transfers.push({ from: debtor.name, to: creditor.name, amount: Math.round(amount * 100) / 100 });
+      transfers.push({ from: debtor.name, to: creditor.name, amount: amount / 100 });
       creditor.balance -= amount;
       left -= amount;
     }
